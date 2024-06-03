@@ -21,7 +21,7 @@ class CsvControllerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->filename = __DIR__ . '/assets/users.csv';
+        $this->filename = dirname(__DIR__ ). '/app/assets/users.csv';
         $this->mockCsvModel = $this->createMock(CsvModel::class);
         $this->csvCtrl = new CsvController($this->mockCsvModel, $this->filename);
     }
