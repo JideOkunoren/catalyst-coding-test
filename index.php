@@ -5,7 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Config\DatabaseConn;
-
+use App\Controllers\CsvController;
+use App\Models\CsvModel;
 
 /**
  * @return void
@@ -16,6 +17,7 @@ function displayWelcomeMessage(): void
       Welcome to the Catalyst Coding Challenge.
       To run the scripts, use the following options:
       --create_table          Build the MySQL users table and exit
+      --dry_run               Run the CSV read script without altering the database
       -u                      MySQL username
       -p                      MySQL password
       -h                      MySQL host
@@ -23,8 +25,9 @@ function displayWelcomeMessage(): void
     
     Examples:
      php index.php --create_table -u user -p password -h localhost
+     php index.php --file path_to__csv_file.csv --dry_run -u user -p password -h localhost
      php index.php --help
-            
+     
     WELCOME;
 }
 
@@ -38,6 +41,8 @@ Usage: php index.php [options]
 
 Options:
   --create_table          Build the MySQL users table and exit
+  --file [csv file name]  Parse the specified CSV file & save the data to the database
+  --dry_run               Run the CSV read script without updating the database
   -u                      MySQL username
   -p                      MySQL password
   -h                      MySQL host
@@ -45,7 +50,10 @@ Options:
 
 Examples:
   php index.php --create_table -u user -p password -h localhost
-     php index.php --help  
+  php index.php --file path_to_csv/foo.csv -u user -p password -h localhost
+  php index.php --file path_to__csv/bar.csv --dry_run -u user -p password -h localhost
+  php index.php --help
+  
 HELP;
 }
 
@@ -79,10 +87,40 @@ function createDataBaseTable(): void
 }
 
 
-$options = getopt("u:p:h:", ["create_table:", "help:"]);
+$options = getopt("u:p:h:", ["file:", "create_table", "dry_run", "help"]);
 
 match (true) {
     isset($options['help']) || (empty($options) && $argc === 1) => displayWelcomeMessage(),
-    isset($options['create_table']) => createDataBaseTable($options),
+    isset($options['create_table']) => createDataBaseTable(),
+    isset($options['dry_run']) || isset($options['file']) &&
+    checkRequiredOptions(['u', 'p', 'h'], $options) => executeCsvTasks($options),
     default => displayHelpMessage()
 };
+
+function checkRequiredOptions(array $requiredOptions, array $options): bool
+{
+    foreach ($requiredOptions as $option) {
+        if (!isset($options[$option])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function executeCsvTasks(array $options): void
+{
+    try {
+        $db = initializeDatabaseConnection();
+        $csvModel = new CsvModel($db);
+        $csvController = new CsvController($csvModel, $options['file']);
+        if (isset($options['dry_run'])) {
+            echo "Dry Run executed. Database not altered." . PHP_EOL;
+        } else {
+            $csvController->writeToDatabase();
+            echo count($csvController->getValidData()) . ' records were written to the MySQL users table successfully.' . PHP_EOL;
+        }
+
+    } catch (Exception $e) {
+        echo "An Error occurred : " . $e->getMessage() . PHP_EOL;
+    }
+}
