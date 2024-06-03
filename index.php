@@ -7,6 +7,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use App\Config\DatabaseConn;
 use App\Controllers\CsvController;
 use App\Models\CsvModel;
+use App\Scripts\FooBar;
 
 /**
  * @return void
@@ -16,6 +17,7 @@ function displayWelcomeMessage(): void
     echo <<<WELCOME
       Welcome to the Catalyst Coding Challenge.
       To run the scripts, use the following options:
+      --foobar                Run a Logic Test in the style of "FizzBuzz"
       --create_table          Build the MySQL users table and exit
       --dry_run               Run the CSV read script without altering the database
       -u                      MySQL username
@@ -24,6 +26,7 @@ function displayWelcomeMessage(): void
       --help                  Display this help message
     
     Examples:
+     php index.php --foobar
      php index.php --create_table -u user -p password -h localhost
      php index.php --file path_to__csv_file.csv --dry_run -u user -p password -h localhost
      php index.php --help
@@ -40,6 +43,7 @@ function displayHelpMessage(): void
 Usage: php index.php [options]
 
 Options:
+  --foobar                Run a Logic Test in the style of "FizzBuzz"
   --create_table          Build the MySQL users table and exit
   --file [csv file name]  Parse the specified CSV file & save the data to the database
   --dry_run               Run the CSV read script without updating the database
@@ -49,6 +53,7 @@ Options:
   --help                  Display this help message
 
 Examples:
+  php index.php --foobar
   php index.php --create_table -u user -p password -h localhost
   php index.php --file path_to_csv/foo.csv -u user -p password -h localhost
   php index.php --file path_to__csv/bar.csv --dry_run -u user -p password -h localhost
@@ -87,10 +92,11 @@ function createDataBaseTable(): void
 }
 
 
-$options = getopt("u:p:h:", ["file:", "create_table", "dry_run", "help"]);
+$options = getopt("u:p:h:", ["foobar", "file:", "create_table", "dry_run", "help"]);
 
 match (true) {
     isset($options['help']) || (empty($options) && $argc === 1) => displayWelcomeMessage(),
+    isset($options['foobar']) => runFooBar(),
     isset($options['create_table']) => createDataBaseTable(),
     isset($options['dry_run']) || isset($options['file']) &&
     checkRequiredOptions(['u', 'p', 'h'], $options) => executeCsvTasks($options),
@@ -123,4 +129,13 @@ function executeCsvTasks(array $options): void
     } catch (Exception $e) {
         echo "An Error occurred : " . $e->getMessage() . PHP_EOL;
     }
+}
+
+/**
+ * @return void
+ */
+function runFooBar(): void
+{
+    $fizzBuzz = new FooBar();
+    $fizzBuzz->runFooBar();
 }
