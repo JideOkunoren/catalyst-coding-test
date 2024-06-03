@@ -8,6 +8,7 @@ use App\Config\DatabaseConn;
 use App\Controllers\CsvController;
 use App\Models\CsvModel;
 use App\Scripts\FooBar;
+use App\Scripts\ShortWords;
 
 /**
  * @return void
@@ -18,6 +19,7 @@ function displayWelcomeMessage(): void
       Welcome to the Catalyst Coding Challenge.
       To run the scripts, use the following options:
       --foobar                Run a Logic Test in the style of "FizzBuzz"
+      --short_words           Run a program to find & display the shortest word from each line of a text file
       --create_table          Build the MySQL users table and exit
       --dry_run               Run the CSV read script without altering the database
       -u                      MySQL username
@@ -27,6 +29,7 @@ function displayWelcomeMessage(): void
     
     Examples:
      php index.php --foobar
+     php index.php --short_words --file path_to_file.txt
      php index.php --create_table -u user -p password -h localhost
      php index.php --file path_to__csv_file.csv --dry_run -u user -p password -h localhost
      php index.php --help
@@ -44,6 +47,7 @@ Usage: php index.php [options]
 
 Options:
   --foobar                Run a Logic Test in the style of "FizzBuzz"
+  --short_words           Run a program to find & display the shortest word from each line of a text file
   --create_table          Build the MySQL users table and exit
   --file [csv file name]  Parse the specified CSV file & save the data to the database
   --dry_run               Run the CSV read script without updating the database
@@ -54,6 +58,7 @@ Options:
 
 Examples:
   php index.php --foobar
+  php index.php --short_words --file path_to_file.txt
   php index.php --create_table -u user -p password -h localhost
   php index.php --file path_to_csv/foo.csv -u user -p password -h localhost
   php index.php --file path_to__csv/bar.csv --dry_run -u user -p password -h localhost
@@ -92,11 +97,13 @@ function createDataBaseTable(): void
 }
 
 
-$options = getopt("u:p:h:", ["foobar", "file:", "create_table", "dry_run", "help"]);
+$options = getopt("u:p:h:", ["foobar", "short_words", "file:", "create_table", "dry_run", "help"]);
 
 match (true) {
+
     isset($options['help']) || (empty($options) && $argc === 1) => displayWelcomeMessage(),
     isset($options['foobar']) => runFooBar(),
+    isset($options['short_words']) && isset($options['file']) => runShortWords($options),
     isset($options['create_table']) => createDataBaseTable(),
     isset($options['dry_run']) || isset($options['file']) &&
     checkRequiredOptions(['u', 'p', 'h'], $options) => executeCsvTasks($options),
@@ -138,4 +145,19 @@ function runFooBar(): void
 {
     $fizzBuzz = new FooBar();
     $fizzBuzz->runFooBar();
+}
+
+/**
+ * @param $options
+ * @return void
+ */
+function runShortWords($options): void
+{
+    try {
+        $filename = $options['file'];
+        $shortWords = new ShortWords();
+        $shortWords->readFile($filename);
+    } catch (Exception $e) {
+        echo "An Error occurred : " . $e->getMessage() . PHP_EOL;
+    }
 }
