@@ -1,9 +1,7 @@
 {
   "autoload": {
     "psr-4": {
-      "App\\Controllers\\": "Controllers/",
-      "App\\Config\\": "Config/",
-      "App\\Models\\": "Models/"
+       "App\\": "app/"
     }
   },
   "require-dev": {
