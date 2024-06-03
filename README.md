@@ -24,6 +24,7 @@ This is Repo is in conjunction with Catalyst's Programming Evaluation for PHP & 
    Welcome to the Catalyst Coding Challenge.
   To run the scripts, use the following options:
   --foobar                Run a Logic Test in the style of "FizzBuzz"
+   --short_words           Run a program to find & display the shortest word from each line of a text file
   --create_table          Build the MySQL users table and exit
   --dry_run               Run the CSV read script without altering the database
   -u                      MySQL username
@@ -33,6 +34,7 @@ This is Repo is in conjunction with Catalyst's Programming Evaluation for PHP & 
 
 Examples:
  php index.php --foobar
+ php index.php --short_words --file path_to_file.txt
  php index.php --create_table -u user -p password -h localhost
  php index.php --file path_to__csv_file.csv --dry_run -u user -p password -h localhost
  php index.php --help
