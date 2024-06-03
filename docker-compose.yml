@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  # Web Server
+  catalyst-test-server:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: always
+    volumes:
+      - "./app/:/var/www/html/app"
+      - "./index.php/:/var/www/html/index.php"
+    ports:
+      - "8081:80"
+    depends_on:
+      - catalyst-test-db
+    environment:
+      DB_HOST: catalyst-test-db
+      DB_USER: root
+      DB_PASSWORD: test
+      DB_DATABASE: test_db
+  # Database
+  catalyst-test-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: test_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql-data:
