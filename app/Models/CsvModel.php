@@ -31,6 +31,9 @@ class CsvModel
         $sql = "INSERT INTO users (name, surname, email) VALUES (:name, :surname, :email)";
 
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue('name', $userData['name'], PDO::PARAM_STR);
+        $stmt->bindValue('surname', $userData['surname'], PDO::PARAM_STR);
+        $stmt->bindValue('email', $userData['email'], PDO::PARAM_STR);
         return $stmt->execute($userData);
     }
 
@@ -42,6 +45,7 @@ class CsvModel
     {
         $sql = "SELECT id FROM users WHERE email = :email";
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue('email', $email, PDO::PARAM_STR);
         $stmt->execute(['email' => $email]);
         return $stmt->fetchColumn() > 0;
     }

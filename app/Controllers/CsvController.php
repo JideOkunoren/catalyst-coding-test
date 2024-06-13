@@ -65,14 +65,16 @@ class CsvController
      */
     private function readCsv(): void
     {
+
         try {
-            $fileHandle = fopen($this->filename, 'r');
+            $fileHandle = fopen($this->filename, 'rb');
 
             if ($fileHandle === false) {
                 throw new Exception("Cannot open file '{$this->filename}'");
             }
 
             $emails = [];
+
 
             fgetcsv($fileHandle);
 
